@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_teste/src/api.dart';
-import 'package:flutter_teste/pages/dashboard.dart'; // Certifique-se de que esta página existe.
+import 'package:flutter_teste/pages/dashboard.dart'; // Certifique-se de que este arquivo existe.
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(), // Alteração para usar a tela LoginPage
+      home: const LoginPage(), // Tela inicial ajustada para LoginPage
     );
   }
 }
@@ -43,21 +43,20 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // Chamando o serviço de autenticação da API
       await _apiService.authenticate(
-        _emailController.text,
-        _passwordController.text,
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
-      
-      // Se a autenticação for bem-sucedida, navega para a tela Dashboard
+
       if (mounted) {
+        debugPrint('Navegando para a tela Dashboard...');
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Dashboard()), // Substituindo PublisherFlutter por Dashboard
+          MaterialPageRoute(builder: (context) => Dashboard()),
         );
       }
     } catch (e) {
-      setState(() => _errorMessage = e.toString());
+      setState(() => _errorMessage = 'Erro ao autenticar: ${e.toString()}');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -81,47 +80,47 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 10.0),
-            // Campo de Email
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                ),
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(
+                      labelText: "Email",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                      ),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) => (value?.isEmpty ?? true) ? 'Insira seu email' : null,
+                  ),
+                  const SizedBox(height: 16.0),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      labelText: "Senha",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
+                      ),
+                    ),
+                    obscureText: true,
+                    validator: (value) => (value?.isEmpty ?? true) ? 'Insira sua senha' : null,
+                  ),
+                ],
               ),
-              keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor, insira um email';
-                }
-                return null;
-              },
             ),
             const SizedBox(height: 16.0),
-            // Campo de Senha
-            TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: "Senha",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                ),
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
               ),
-              obscureText: true,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor, insira a senha';
-                }
-                return null;
-              },
-            ),
             const SizedBox(height: 16.0),
-            // Botão de Login
             ElevatedButton(
-              onPressed: _isLoading ? null : _login, // Desabilita o botão se estiver carregando
+              onPressed: _isLoading ? null : _login,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(34, 1, 39, 1),
+                backgroundColor: const Color.fromRGBO(34, 1, 39, 1),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30.0),
@@ -129,25 +128,13 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
               ),
               child: _isLoading
-                  ? const CircularProgressIndicator(
-                      color: Colors.white,
-                    )
+                  ? const CircularProgressIndicator(color: Colors.white)
                   : const Text("CONFIRMAR"),
             ),
             const SizedBox(height: 16.0),
-            // Mensagem de erro (se houver)
-            if (_errorMessage != null)
-              Text(
-                _errorMessage!,
-                style: TextStyle(color: Colors.red),
-              ),
-            // Botão de Esqueci minha Senha
             TextButton(
-              onPressed: () {
-                // Lógica para recuperação de senha
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Função não implementada!")),
-                );
+              onPressed: _isLoading ? null : () {
+                // Adicione a lógica de recuperação de senha aqui
               },
               child: const Text("Esqueci minha senha"),
             ),

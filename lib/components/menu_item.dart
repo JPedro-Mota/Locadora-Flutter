@@ -20,13 +20,13 @@ class MenuItem extends StatelessWidget {
         padding: const EdgeInsets.all(10.0),
         child: Row(
           children: [
-            Icon(icon, color: Colors.blue, size: 24),
+            Icon(icon, color: Colors.blue, size: 30),
             const SizedBox(width: 20),
             Text(
               title,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 23,
+                fontSize: 30,
               ),
             ),
           ],

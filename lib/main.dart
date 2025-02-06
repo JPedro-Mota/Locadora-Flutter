@@ -16,7 +16,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: const LoginPage(),
-      
     );
   }
 }
@@ -96,7 +95,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    validator: (value) => (value?.isEmpty ?? true) ? 'Insira seu email' : null,
+                    validator: (value) =>
+                        (value?.isEmpty ?? true) ? 'Insira seu email' : null,
                   ),
                   const SizedBox(height: 16.0),
                   TextFormField(
@@ -108,7 +108,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     obscureText: true,
-                    validator: (value) => (value?.isEmpty ?? true) ? 'Insira sua senha' : null,
+                    validator: (value) =>
+                        (value?.isEmpty ?? true) ? 'Insira sua senha' : null,
                   ),
                 ],
               ),
@@ -134,11 +135,12 @@ class _LoginPageState extends State<LoginPage> {
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text("CONFIRMAR"),
             ),
-            const SizedBox(height: 16.0),
             TextButton(
-              onPressed: _isLoading ? null : () {
-                // Adicione a lógica de recuperação de senha aqui
-              },
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      // Adicione a lógica de recuperação de senha aqui
+                    },
               child: const Text("Esqueci minha senha"),
             ),
           ],

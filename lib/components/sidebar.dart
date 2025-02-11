@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_teste/bloc.naviagation_bloc/navigation_bloc.dart';
 import 'package:flutter_teste/components/menu_item.dart';
-import 'package:flutter_teste/pages/UsersPage.dart';
+import 'package:flutter_teste/views/user_view/user_page.dart';
 import 'package:flutter_teste/pages/DashboardPage.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter_teste/main.dart';
@@ -158,7 +158,9 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
                         icon: Icons.edit,
                         title: "Editora",
                         onTap: () {
-                          Navigator.pushNamed(context, '/');
+                          onIconPressed();
+                          BlocProvider.of<NavigationBloc>(context)
+                              .add(NavigationEvents.PublisherClickedEvent);
                         },
                       ),
 
@@ -177,14 +179,13 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
                 ),
               ),
               Align(
-                alignment: const Alignment(0, -0.9),
+                alignment: const Alignment(0, -0.88),
                 child: GestureDetector(
                   onTap: onIconPressed,
                   child: ClipPath(
-                    clipper: CustomMenuClipper(),
                     child: Container(
                       width: 30,
-                      height: 110,
+                      height: 60,
                       color: const Color.fromRGBO(34, 1, 39, 1),
                       alignment: Alignment.centerLeft,
                       child: Tooltip(
@@ -193,7 +194,7 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
                           progress: _animationController.view,
                           icon: AnimatedIcons.menu_close,
                           color: const Color(0xFF1BB5FD),
-                          size: 25,
+                          size: 30,
                         ),
                       ),
                     ),
@@ -208,27 +209,7 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
   }
 }
 
-class CustomMenuClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Paint paint = Paint();
-    paint.color = Colors.white;
-
-    final width = size.width;
-    final height = size.height;
-
-    Path path = Path();
-    path.moveTo(0, 0);
-    path.quadraticBezierTo(0, 8, 10, 16);
-    path.quadraticBezierTo(width - 1, height / 2 - 20, width, height / 2);
-    path.quadraticBezierTo(width + 1, height / 2 + 20, 10, height - 16);
-    path.quadraticBezierTo(0, height - 8, 0, height);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return true;
-  }
+@override
+bool shouldReclip(CustomClipper<Path> oldClipper) {
+  return true;
 }

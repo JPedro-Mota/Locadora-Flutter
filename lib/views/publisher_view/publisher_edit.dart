@@ -1,39 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_teste/data/models/publisher_model.dart';
+import 'package:flutter_teste/services/publisher_service.dart';
 import 'package:flutter_teste/services/user_service.dart';
 import 'package:flutter_teste/data/models/user_model.dart';
 
-class UpdateUserPage extends StatefulWidget {
-  final int userId;
+class UpdatePublisherPage extends StatefulWidget {
+  final int publisherId;
 
-  const UpdateUserPage({super.key, required this.userId});
+  const UpdatePublisherPage({super.key, required this.publisherId});
 
   @override
-  State<UpdateUserPage> createState() => _UpdateUserPageState();
+  State<UpdatePublisherPage> createState() => _UpdatePublisherPageState();
 }
 
-class _UpdateUserPageState extends State<UpdateUserPage> {
+class _UpdatePublisherPageState extends State<UpdatePublisherPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  String _selectedRole = 'USER'; // Valor padrão
+  final TextEditingController _telephoneController = TextEditingController();
+  TextEditingController _siteController =
+      TextEditingController(); // Valor padrão
 
-  final UserService userService = UserService();
+  final PublisherService publisherService = PublisherService();
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadPublisherData();
   }
 
-  Future<void> _loadUserData() async {
+  Future<void> _loadPublisherData() async {
     try {
-      UsersModel? user = await userService.getById(id: widget.userId);
-      if (user != null) {
+      PublisherModel? publisher =
+          await publisherService.getById(id: widget.publisherId);
+      if (publisher != null) {
         setState(() {
-          _nameController.text = user.name;
-          _emailController.text = user.email;
-          _selectedRole = user.role.toString();
+          _nameController.text = publisher.name;
+          _emailController.text = publisher.email;
+          _telephoneController.text = publisher.telephone.toString();
+          _siteController.text = publisher.site.toString();
           _isLoading = false;
         });
       }
@@ -47,19 +53,20 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
     }
   }
 
-  Future<void> _updateUser() async {
+  Future<void> _updatePublisher() async {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text;
       final email = _emailController.text;
-      final role = _selectedRole;
+      final telephone = _telephoneController.text;
+      final site = _siteController.text;
 
       try {
-        await userService.updateUser(
-          id: widget.userId,
-          name: name,
-          email: email,
-          role: role,
-        );
+        await publisherService.updatePublisher(
+            id: widget.publisherId,
+            name: name,
+            email: email,
+            telephone: telephone,
+            site: site);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Usuário atualizado com sucesso!')),
         );
@@ -106,25 +113,24 @@ class _UpdateUserPageState extends State<UpdateUserPage> {
                 validator: (value) =>
                     value!.isEmpty ? 'Email não pode estar vazio' : null,
               ),
-              DropdownButtonFormField<String>(
-                value: _selectedRole,
-                decoration: const InputDecoration(labelText: 'Cargo'),
-                items: ['ADMIN', 'USER']
-                    .map((role) =>
-                        DropdownMenuItem(value: role, child: Text(role)))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedRole = value!;
-                  });
-                },
+              TextFormField(
+                controller: _telephoneController,
+                decoration: const InputDecoration(labelText: 'Telephone'),
+                keyboardType: TextInputType.phone,
+                validator: (value) =>
+                    value!.isEmpty ? 'Telephone não pode estar vazio' : null,
+              ),
+              TextFormField(
+                controller: _siteController,
+                decoration: const InputDecoration(labelText: 'Site'),
+                keyboardType: TextInputType.url,
               ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: _updateUser,
+                    onPressed: _updatePublisher,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
                       foregroundColor: Colors.white,

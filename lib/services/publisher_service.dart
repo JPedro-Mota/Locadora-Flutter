@@ -1,21 +1,22 @@
 import 'dart:convert';
+import 'package:flutter_teste/data/models/publisher_model.dart';
 import 'package:flutter_teste/data/models/user_model.dart';
 import 'package:flutter_teste/src/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-class UserService {
+class PublisherService {
   static const String baseURL =
       'https://locadora-joaopedro-back.altislabtech.com.br';
 
   // Função para criar um usuário
-  Future<void> createUser({
+  Future<void> createPublisher({
     required String name,
     required String email,
-    required String role,
-    required String password,
+    required String telephone,
+     String? site,
   }) async {
-    final url = Uri.parse('$baseURL/user');
+    final url = Uri.parse('$baseURL/publisher');
 
     // Recupera o token salvo no SharedPreferences
     final prefs = await SharedPreferences.getInstance();
@@ -35,8 +36,8 @@ class UserService {
     final body = jsonEncode({
       "name": name,
       "email": email,
-      "role": role,
-      "password": password,
+      "telephone": telephone,
+      "site": site,
     });
 
     try {
@@ -45,7 +46,7 @@ class UserService {
 
       // Verifica o status da resposta
       if (response.statusCode == 201) {
-        print("Usuário criado com sucesso!");
+        print("Publisher criado com sucesso!");
       } else {
         print(
             "Erro ao criar usuário: ${response.statusCode} - ${response.body}");
@@ -56,7 +57,7 @@ class UserService {
   }
 
   // Função para buscar usuários
-  Future<List<UsersModel>> fetchUsers(String search, int page) async {
+  Future<List<PublisherModel>> fetchPublisher(String search, int page) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
     print('AAAAAAAAA: $token');
@@ -66,8 +67,8 @@ class UserService {
       throw Exception("Token não encontrado. Faça o login novamente.");
     }
 
-    final url = Uri.parse('$baseURL/user?search=$search&page=$page');
-    print('$baseURL/user?search=$search&page=$page');
+    final url = Uri.parse('$baseURL/publisher?search=$search&page=$page');
+    print('$baseURL/publisher?search=$search&page=$page');
 
     final headers = {
       "Content-Type": "application/json",
@@ -85,7 +86,7 @@ class UserService {
           throw Exception("Nenhum usuário encontrado.");
         }
 
-        return content.map((value) => UsersModel.fromJson(value)).toList();
+        return content.map((value) => PublisherModel.fromJson(value)).toList();
       } else {
         throw Exception(
             'Erro ao buscar usuários: ${response.statusCode} - ${response.body}');
@@ -95,20 +96,20 @@ class UserService {
     }
   }
 
-  Future<List<UsersModel>> fetchAllUsers(String search) async {
+  Future<List<PublisherModel>> fetchAllPublisher(String search) async {
     final apiService = ApiService();
-    final response = await apiService.fetchData('user?search=$search');
+    final response = await apiService.fetchData('publisher?search=$search');
 
     final dynamic jsonData = jsonDecode(response.body);
 
-    final List<dynamic> content = 
-    jsonData is List ? jsonData : jsonData ["content"];
+    final List<dynamic> content =
+        jsonData is List ? jsonData : jsonData["content"];
 
-    return content.map((value) => UsersModel.fromJson(value)).toList();
+    return content.map((value) => PublisherModel.fromJson(value)).toList();
   }
- 
-  Future<UsersModel?> getById({required int id}) async {
-    final url = Uri.parse('$baseURL/user/$id');
+
+  Future<PublisherModel?> getById({required int id}) async {
+    final url = Uri.parse('$baseURL/publisher/$id');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
 
@@ -133,12 +134,12 @@ class UserService {
         if (!jsonData.containsKey('id') ||
             !jsonData.containsKey('name') ||
             !jsonData.containsKey('email') ||
-            !jsonData.containsKey('role')) {
+            !jsonData.containsKey('telephone')) {
           throw Exception("Dados inválidos recebidos da API.");
         }
 
         print(UsersModel.fromJson(jsonData)); // Exibe os dados para debug
-        return UsersModel.fromJson(jsonData);
+        return PublisherModel.fromJson(jsonData);
       } else {
         print('Erro: ${response.statusCode} - ${response.body}');
         return null; // Retorna null se a resposta não for 200
@@ -149,13 +150,14 @@ class UserService {
     }
   }
 
-  Future<void> updateUser({
+  Future<void> updatePublisher({
     required int id,
     required String name,
     required String email,
-    required String role,
+    required String telephone,
+    String? site,
   }) async {
-    final url = Uri.parse('$baseURL/user/$id');
+    final url = Uri.parse('$baseURL/publisher/$id');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
 
@@ -167,14 +169,15 @@ class UserService {
     final body = jsonEncode({
       "name": name,
       "email": email,
-      "role": role,
+      "telephone": telephone,
+      "site": site,
     });
 
     try {
       final response = await http.put(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
-        print("Usuario editado com sucesso");
+        print("Editora editado com sucesso");
       } else {
         print(
             'Erro ao editar usuario: ${response.statusCode} - ${response.body}');

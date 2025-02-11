@@ -15,11 +15,20 @@ class UsersPage extends StatefulWidget {
 class _UsersPageState extends State<UsersPage> {
   late Future<List<UsersModel>> futureUsers;
   final UserService userService = UserService();
+  final TextEditingController _searchController = TextEditingController();
+  String searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     futureUsers = userService.fetchUsers('', 0);
+    _fetchUsers();
+  }
+
+  void _fetchUsers() {
+    setState(() {
+      futureUsers = userService.fetchUsers(searchQuery, 0);
+    });
   }
 
   void _showUserOptions(UsersModel user) {
@@ -107,6 +116,30 @@ class _UsersPageState extends State<UsersPage> {
             },
           ),
         ],
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(60.0),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(50.0, 8.0, 8.0, 12.0),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                    _fetchUsers();
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Pesquisar usuário...',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+              ),
+            )),
       ),
       body: FutureBuilder<List<UsersModel>>(
         future: futureUsers,

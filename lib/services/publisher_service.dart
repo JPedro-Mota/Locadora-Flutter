@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_teste/data/models/publisher_model.dart';
 import 'package:flutter_teste/data/models/user_model.dart';
 import 'package:flutter_teste/src/api.dart';
@@ -186,4 +187,48 @@ class PublisherService {
       throw Exception('Erro na requisição POST: $e');
     }
   }
+
+   Future<bool> deletePublisher(
+      {required int id, required BuildContext context}) async {
+    final url = Uri.parse('$baseURL/publisher/$id');
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('authToken');
+
+    final headers = {
+      "Content-Type": "application/json",
+      if (token != null) "Authorization": "Bearer $token",
+    };
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("A editora foi excluída!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        return true;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao excluir: ${response.body}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro na requisição DELETE: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+  }
+
 }
+

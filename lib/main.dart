@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_teste/components/sidebar_layout.dart';
-import 'package:flutter_teste/views/user_view/user_page.dart';
 import 'package:flutter_teste/src/api.dart';
 import 'package:flutter_teste/pages/DashboardPage.dart'; // Certifique-se de que este arquivo existe.
 

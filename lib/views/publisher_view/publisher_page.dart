@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_teste/data/models/publisher_model.dart';
 import 'package:flutter_teste/data/models/user_model.dart';
 import 'package:flutter_teste/services/publisher_service.dart';
+import 'package:flutter_teste/views/publisher_view/publisher_create.dart';
 import 'package:flutter_teste/views/publisher_view/publisher_detail.dart';
 import 'package:flutter_teste/views/publisher_view/publisher_edit.dart';
 
@@ -35,7 +36,37 @@ class _PublisherPageState extends State<PublisherPage> {
     });
   }
 
-  void _showUserOptions(PublisherModel publisher) {
+  void _showDeleteConfirmationDialog(PublisherModel publisher) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirmar Exclusão"),
+          content: Text(
+              "Tem certeza que deseja deletar a editora '${publisher.name}'?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Fecha o diálogo
+              },
+              child: const Text("Cancelar"),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context); // Fecha o diálogo antes de excluir
+                await publisherService.deletePublisher(
+                    id: publisher.id, context: context);
+                _fetchPublisher(); // Atualiza a lista após exclusão
+              },
+              child: const Text("Sim", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPublisherOptions(PublisherModel publisher) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -86,8 +117,8 @@ class _PublisherPageState extends State<PublisherPage> {
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: const Text('Excluir'),
                 onTap: () {
-                  // Lógica para excluir usuário
                   Navigator.pop(context);
+                  _showDeleteConfirmationDialog(publisher);
                 },
               ),
             ],
@@ -116,7 +147,8 @@ class _PublisherPageState extends State<PublisherPage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CreateUserPage()),
+                MaterialPageRoute(
+                    builder: (context) => const CreatePublisherPage()),
               );
             },
           ),
@@ -168,7 +200,7 @@ class _PublisherPageState extends State<PublisherPage> {
                 subtitle: Text(publisher.email),
                 trailing: Text(publisher.telephone),
                 leading: const Icon(Icons.person),
-                onTap: () => _showUserOptions(publisher),
+                onTap: () => _showPublisherOptions(publisher),
               );
             },
           );

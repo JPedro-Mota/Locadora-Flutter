@@ -1,24 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_teste/data/models/publisher_model.dart';
 import 'package:flutter_teste/data/models/renter_model.dart';
-import 'package:flutter_teste/data/models/user_model.dart';
 import 'package:flutter_teste/src/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-class PublisherService {
+class RenterService {
   static const String baseURL =
       'https://locadora-joaopedro-back.altislabtech.com.br';
 
   // Função para criar um usuário
-  Future<void> createPublisher({
+  Future<void> createRenter({
     required String name,
     required String email,
     required String telephone,
-     String? site,
+    required String address,
+    required String cpf,
+  
   }) async {
-    final url = Uri.parse('$baseURL/publisher');
+    final url = Uri.parse('$baseURL/renter');
 
     // Recupera o token salvo no SharedPreferences
     final prefs = await SharedPreferences.getInstance();
@@ -39,7 +39,8 @@ class PublisherService {
       "name": name,
       "email": email,
       "telephone": telephone,
-      "site": site,
+      "address": address,
+      "cpf": cpf,
     });
 
     try {
@@ -48,10 +49,10 @@ class PublisherService {
 
       // Verifica o status da resposta
       if (response.statusCode == 201) {
-        print("Publisher criado com sucesso!");
+        print("Locatário criado com sucesso!");
       } else {
         print(
-            "Erro ao criar usuário: ${response.statusCode} - ${response.body}");
+            "Erro ao criar locatário: ${response.statusCode} - ${response.body}");
       }
     } catch (e) {
       throw Exception('Erro na requisição POST: $e');
@@ -59,7 +60,7 @@ class PublisherService {
   }
 
   // Função para buscar usuários
-  Future<List<PublisherModel>> fetchPublisher(String search, int page) async {
+  Future<List<RenterModel>> fetchRenter(String search, int page) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
     print('AAAAAAAAA: $token');
@@ -69,8 +70,8 @@ class PublisherService {
       throw Exception("Token não encontrado. Faça o login novamente.");
     }
 
-    final url = Uri.parse('$baseURL/publisher?search=$search&page=$page');
-    print('$baseURL/publisher?search=$search&page=$page');
+    final url = Uri.parse('$baseURL/renter?search=$search&page=$page');
+    print('$baseURL/renter?search=$search&page=$page');
 
     final headers = {
       "Content-Type": "application/json",
@@ -85,33 +86,33 @@ class PublisherService {
         final List<dynamic>? content = jsonData["content"];
 
         if (content == null) {
-          throw Exception("Nenhum usuário encontrado.");
+          throw Exception("Nenhum renter encontrado.");
         }
 
-        return content.map((value) => PublisherModel.fromJson(value)).toList();
+        return content.map((value) => RenterModel.fromJson(value)).toList();
       } else {
         throw Exception(
-            'Erro ao buscar usuários: ${response.statusCode} - ${response.body}');
+            'Erro ao buscar renter: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       throw Exception('Erro na requisição GET: $e');
     }
   }
 
-  Future<List<PublisherModel>> fetchAllPublisher(String search) async {
+  Future<List<RenterModel>> fetchAllRenter(String search) async {
     final apiService = ApiService();
-    final response = await apiService.fetchData('publisher?search=$search');
+    final response = await apiService.fetchData('renter?search=$search');
 
     final dynamic jsonData = jsonDecode(response.body);
 
     final List<dynamic> content =
         jsonData is List ? jsonData : jsonData["content"];
 
-    return content.map((value) => PublisherModel.fromJson(value)).toList();
+    return content.map((value) => RenterModel.fromJson(value)).toList();
   }
 
-  Future<PublisherModel?> getById({required int id}) async {
-    final url = Uri.parse('$baseURL/publisher/$id');
+  Future<RenterModel?> getById({required int id}) async {
+    final url = Uri.parse('$baseURL/renter/$id');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
 
@@ -132,16 +133,8 @@ class PublisherService {
         print("Sucesso");
 
         final Map<String, dynamic> jsonData = jsonDecode(response.body);
-
-        if (!jsonData.containsKey('id') ||
-            !jsonData.containsKey('name') ||
-            !jsonData.containsKey('email') ||
-            !jsonData.containsKey('telephone')) {
-          throw Exception("Dados inválidos recebidos da API.");
-        }
-
-        print(PublisherModel.fromJson(jsonData)); // Exibe os dados para debug
-        return PublisherModel.fromJson(jsonData);
+        print(RenterModel.fromJson(jsonData)); // Exibe os dados para debug
+        return RenterModel.fromJson(jsonData);
       } else {
         print('Erro: ${response.statusCode} - ${response.body}');
         return null; // Retorna null se a resposta não for 200
@@ -152,14 +145,15 @@ class PublisherService {
     }
   }
 
-  Future<void> updatePublisher({
+  Future<void> updateRenter({
     required int id,
     required String name,
     required String email,
     required String telephone,
-    String? site,
+    required String cpf,
+    required String address,
   }) async {
-    final url = Uri.parse('$baseURL/publisher/$id');
+    final url = Uri.parse('$baseURL/renter/$id');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
 
@@ -172,26 +166,27 @@ class PublisherService {
       "name": name,
       "email": email,
       "telephone": telephone,
-      "site": site,
+      "cpf": cpf,
+      "address":address 
     });
 
     try {
       final response = await http.put(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
-        print("Editora editado com sucesso");
+        print("Locatário editado com sucesso");
       } else {
         print(
-            'Erro ao editar usuario: ${response.statusCode} - ${response.body}');
+            'Erro ao editar locatário: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       throw Exception('Erro na requisição POST: $e');
     }
   }
 
-   Future<bool> deletePublisher(
+  Future<bool> deleteRenter(
       {required int id, required BuildContext context}) async {
-    final url = Uri.parse('$baseURL/publisher/$id');
+    final url = Uri.parse('$baseURL/renter/$id');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
 
@@ -206,7 +201,7 @@ class PublisherService {
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("A editora foi excluída!"),
+            content: Text("O locatário foi excluída!"),
             backgroundColor: Colors.green,
           ),
         );
@@ -230,6 +225,4 @@ class PublisherService {
       return false;
     }
   }
-
 }
-

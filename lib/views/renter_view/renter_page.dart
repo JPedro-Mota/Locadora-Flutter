@@ -1,45 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_teste/data/models/publisher_model.dart';
+import 'package:flutter_teste/data/models/renter_model.dart';
+import 'package:flutter_teste/data/models/user_model.dart';
 import 'package:flutter_teste/services/publisher_service.dart';
+import 'package:flutter_teste/services/renter_service.dart';
 import 'package:flutter_teste/views/publisher_view/publisher_create.dart';
 import 'package:flutter_teste/views/publisher_view/publisher_detail.dart';
 import 'package:flutter_teste/views/publisher_view/publisher_edit.dart';
+import 'package:flutter_teste/views/renter_view/renter_create.dart';
+import 'package:flutter_teste/views/renter_view/renter_detail.dart';
 
+import 'package:flutter_teste/views/user_view/user_create_view.dart';
+import 'package:flutter_teste/views/user_view/user_detail_view.dart';
+import 'package:flutter_teste/views/user_view/user_edit_view.dart';
 
-class PublisherPage extends StatefulWidget {
-  const PublisherPage({super.key});
+class RenterPage extends StatefulWidget {
+  const RenterPage({super.key});
 
   @override
-  State<PublisherPage> createState() => _PublisherPageState();
+  State<RenterPage> createState() => _RenterPageState();
 }
 
-class _PublisherPageState extends State<PublisherPage> {
-  late Future<List<PublisherModel>> futurePublisher;
-  final PublisherService publisherService = PublisherService();
+class _RenterPageState extends State<RenterPage> {
+  late Future<List<RenterModel>> futureRenter;
+  final RenterService renterService = RenterService();
   final TextEditingController _searchController = TextEditingController();
   String searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    futurePublisher = publisherService.fetchPublisher('', 0);
-    _fetchPublisher();
+    futureRenter = renterService.fetchRenter('', 0);
+    _fetchRenter();
   }
 
-  void _fetchPublisher() {
+  void _fetchRenter() {
     setState(() {
-      futurePublisher = publisherService.fetchPublisher(searchQuery, 0);
+      futureRenter = renterService.fetchRenter(searchQuery, 0);
     });
   }
 
-  void _showDeleteConfirmationDialog(PublisherModel publisher) {
+  void _showDeleteConfirmationDialog(RenterModel renter) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Confirmar Exclusão"),
           content: Text(
-              "Tem certeza que deseja deletar a editora '${publisher.name}'?"),
+              "Tem certeza que deseja deletar esse locatário '${renter.name}'?"),
           actions: [
             TextButton(
               onPressed: () {
@@ -50,9 +58,9 @@ class _PublisherPageState extends State<PublisherPage> {
             TextButton(
               onPressed: () async {
                 Navigator.pop(context); // Fecha o diálogo antes de excluir
-                await publisherService.deletePublisher(
-                    id: publisher.id, context: context);
-                _fetchPublisher(); // Atualiza a lista após exclusão
+                await renterService.deleteRenter(
+                    id: renter.id, context: context);
+                _fetchRenter(); // Atualiza a lista após exclusão
               },
               child: const Text("Sim", style: TextStyle(color: Colors.red)),
             ),
@@ -62,7 +70,7 @@ class _PublisherPageState extends State<PublisherPage> {
     );
   }
 
-  void _showPublisherOptions(PublisherModel publisher) {
+  void _showRenterOptions(RenterModel renter) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -90,7 +98,7 @@ class _PublisherPageState extends State<PublisherPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => PublisherDetails(id: publisher.id),
+                      builder: (context) => RenterDetails(id: renter.id),
                     ),
                   );
                 },
@@ -99,11 +107,12 @@ class _PublisherPageState extends State<PublisherPage> {
                 leading: const Icon(Icons.edit, color: Colors.blue),
                 title: const Text('Editar'),
                 onTap: () {
+                  // Lógica para editar usuário
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          UpdatePublisherPage(publisherId: publisher.id),
+                          UpdatePublisherPage(publisherId: renter.id),
                     ),
                   );
                 },
@@ -113,7 +122,7 @@ class _PublisherPageState extends State<PublisherPage> {
                 title: const Text('Excluir'),
                 onTap: () {
                   Navigator.pop(context);
-                  _showDeleteConfirmationDialog(publisher);
+                  _showDeleteConfirmationDialog(renter);
                 },
               ),
             ],
@@ -143,7 +152,7 @@ class _PublisherPageState extends State<PublisherPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const CreatePublisherPage()),
+                    builder: (context) => const CreateRenterPage()),
               );
             },
           ),
@@ -157,11 +166,11 @@ class _PublisherPageState extends State<PublisherPage> {
                 onChanged: (value) {
                   setState(() {
                     searchQuery = value;
-                    _fetchPublisher();
+                    _fetchRenter();
                   });
                 },
                 decoration: InputDecoration(
-                  hintText: 'Pesquisar editora...',
+                  hintText: 'Pesquisar locatário...',
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -173,8 +182,8 @@ class _PublisherPageState extends State<PublisherPage> {
               ),
             )),
       ),
-      body: FutureBuilder<List<PublisherModel>>(
-        future: futurePublisher,
+      body: FutureBuilder<List<RenterModel>>(
+        future: futureRenter,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -182,20 +191,20 @@ class _PublisherPageState extends State<PublisherPage> {
           if (snapshot.hasError) {
             return Center(child: Text('Erro: ${snapshot.error}'));
           }
-          final publishers = snapshot.data ?? [];
-          if (publishers.isEmpty) {
-            return const Center(child: Text('Nenhuma editora encontrado.'));
+          final renters = snapshot.data ?? [];
+          if (renters.isEmpty) {
+            return const Center(child: Text('Nenhum locatário encontrado.'));
           }
           return ListView.builder(
-            itemCount: publishers.length,
+            itemCount: renters.length,
             itemBuilder: (context, index) {
-              final publisher = publishers[index];
+              final renter = renters[index];
               return ListTile(
-                title: Text(publisher.name),
-                subtitle: Text(publisher.email),
-                trailing: Text(publisher.telephone),
+                title: Text(renter.name),
+                subtitle: Text(renter.email),
+                trailing: Text(renter.telephone),
                 leading: const Icon(Icons.person),
-                onTap: () => _showPublisherOptions(publisher),
+                onTap: () => _showRenterOptions(renter),
               );
             },
           );

@@ -151,7 +151,9 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
                         icon: Icons.person,
                         title: "Locatários",
                         onTap: () {
-                          Navigator.pushNamed(context, '/');
+                          onIconPressed();
+                          BlocProvider.of<NavigationBloc>(context)
+                              .add(NavigationEvents.RenterClickedEvent);
                         },
                       ),
                       MenuItem(

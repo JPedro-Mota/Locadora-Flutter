@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_teste/bloc.naviagation_bloc/navigation_bloc.dart';
 import 'package:flutter_teste/components/sidebar.dart' as customSidebar;
 import 'package:flutter_teste/views/publisher_view/publisher_page.dart';
+import 'package:flutter_teste/views/renter_view/renter_page.dart';
 import 'package:flutter_teste/views/user_view/user_page.dart';
 import 'package:flutter_teste/pages/DashboardPage.dart';
 
@@ -30,6 +31,10 @@ class _SidebarLayoutState extends State<SidebarLayout> {
                 } else if (navigationState is PublisherState) {
                   return PublisherPage();
                 }
+                else if (navigationState is RenterState) {
+                  return RenterPage();
+                }
+                
                 return const Center(child: Text('Unknown State'));
               },
             ),

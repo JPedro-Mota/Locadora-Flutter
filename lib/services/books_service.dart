@@ -1,23 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_teste/data/models/book_model.dart';
 import 'package:flutter_teste/data/models/renter_model.dart';
 import 'package:flutter_teste/src/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-class RenterService {
+class BooksService {
   static const String baseURL =
       'https://locadora-joaopedro-back.altislabtech.com.br';
 
   // Função para criar um usuário
-  Future<void> createRenter({
+  Future<void> createBook({
     required String name,
-    required String email,
-    required String telephone,
-    required String address,
-    required String cpf,
+    required String publisherId,
+    required String author,
+    required String totalQuantity,
+    required String launchDate,
   }) async {
-    final url = Uri.parse('$baseURL/renter');
+    final url = Uri.parse('$baseURL/book');
 
     // Recupera o token salvo no SharedPreferences
     final prefs = await SharedPreferences.getInstance();
@@ -36,10 +37,10 @@ class RenterService {
 
     final body = jsonEncode({
       "name": name,
-      "email": email,
-      "telephone": telephone,
-      "address": address,
-      "cpf": cpf,
+      "publisherId": publisherId,
+      "author": author,
+      "totalQuantity": totalQuantity,
+      "launchDate": launchDate,
     });
 
     try {
@@ -59,7 +60,7 @@ class RenterService {
   }
 
   // Função para buscar usuários
-  Future<List<RenterModel>> fetchRenter(String search, int page) async {
+  Future<List<BooksModel>> fetchBooks(String search, int page) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
     print('AAAAAAAAA: $token');
@@ -69,8 +70,8 @@ class RenterService {
       throw Exception("Token não encontrado. Faça o login novamente.");
     }
 
-    final url = Uri.parse('$baseURL/renter?search=$search&page=$page');
-    print('$baseURL/renter?search=$search&page=$page');
+    final url = Uri.parse('$baseURL/book?search=$search&page=$page');
+    print('$baseURL/book?search=$search&page=$page');
 
     final headers = {
       "Content-Type": "application/json",
@@ -85,33 +86,33 @@ class RenterService {
         final List<dynamic>? content = jsonData["content"];
 
         if (content == null) {
-          throw Exception("Nenhum renter encontrado.");
+          throw Exception("Nenhum livro encontrado.");
         }
 
-        return content.map((value) => RenterModel.fromJson(value)).toList();
+        return content.map((value) => BooksModel.fromJson(value)).toList();
       } else {
         throw Exception(
-            'Erro ao buscar renter: ${response.statusCode} - ${response.body}');
+            'Erro ao buscar livro: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       throw Exception('Erro na requisição GET: $e');
     }
   }
 
-  Future<List<RenterModel>> fetchAllRenter(String search) async {
+  Future<List<BooksModel>> fetchAllBook(String search) async {
     final apiService = ApiService();
-    final response = await apiService.fetchData('renter?search=$search');
+    final response = await apiService.fetchData('book?search=$search');
 
     final dynamic jsonData = jsonDecode(response.body);
 
     final List<dynamic> content =
         jsonData is List ? jsonData : jsonData["content"];
 
-    return content.map((value) => RenterModel.fromJson(value)).toList();
+    return content.map((value) => BooksModel.fromJson(value)).toList();
   }
 
-  Future<RenterModel?> getById({required int id}) async {
-    final url = Uri.parse('$baseURL/renter/$id');
+  Future<BooksModel?> getById({required int id}) async {
+    final url = Uri.parse('$baseURL/book/$id');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
 
@@ -132,8 +133,8 @@ class RenterService {
         print("Sucesso");
 
         final Map<String, dynamic> jsonData = jsonDecode(response.body);
-        print(RenterModel.fromJson(jsonData)); // Exibe os dados para debug
-        return RenterModel.fromJson(jsonData);
+        print(BooksModel.fromJson(jsonData)); // Exibe os dados para debug
+        return BooksModel.fromJson(jsonData);
       } else {
         print('Erro: ${response.statusCode} - ${response.body}');
         return null; // Retorna null se a resposta não for 200
@@ -144,15 +145,15 @@ class RenterService {
     }
   }
 
-  Future<void> updateRenter({
+  Future<void> updateBooks({
     required int id,
     required String name,
-    required String email,
-    required String telephone,
-    required String cpf,
-    required String address,
+    required String publisherId,
+    required String author,
+    required String totalQuantity,
+    required String launchDate,
   }) async {
-    final url = Uri.parse('$baseURL/renter/$id');
+    final url = Uri.parse('$baseURL/book/$id');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
 
@@ -163,10 +164,10 @@ class RenterService {
 
     final body = jsonEncode({
       "name": name,
-      "email": email,
-      "telephone": telephone,
-      "cpf": cpf,
-      "address": address
+      "publisherId": publisherId,
+      "author": author,
+      "totalQuantity": totalQuantity,
+      "launchDate": launchDate,
     });
 
     try {
@@ -183,9 +184,9 @@ class RenterService {
     }
   }
 
-  Future<bool> deleteRenter(
+  Future<bool> deleteBook(
       {required int id, required BuildContext context}) async {
-    final url = Uri.parse('$baseURL/renter/$id');
+    final url = Uri.parse('$baseURL/book/$id');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
 
@@ -200,7 +201,7 @@ class RenterService {
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("O locatário foi excluída!"),
+            content: Text("O livro foi excluída!"),
             backgroundColor: Colors.green,
           ),
         );

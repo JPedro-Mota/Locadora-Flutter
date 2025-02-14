@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_teste/data/models/publisher_model.dart';
+import 'package:flutter_teste/data/models/renter_model.dart';
 import 'package:flutter_teste/services/publisher_service.dart';
 import 'package:flutter_teste/services/renter_service.dart';
+import 'package:flutter_teste/services/user_service.dart';
+import 'package:flutter_teste/data/models/user_model.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
-class CreateRenterPage extends StatefulWidget {
-  const CreateRenterPage({super.key});
+class UpdateRenterPage extends StatefulWidget {
+  final int renterId;
+
+  const UpdateRenterPage({super.key, required this.renterId});
 
   @override
-  State<CreateRenterPage> createState() => _CreateRenterPageState();
+  State<UpdateRenterPage> createState() => _UpdateRenterPageState();
 }
 
-class _CreateRenterPageState extends State<CreateRenterPage> {
+class _UpdateRenterPageState extends State<UpdateRenterPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -21,25 +27,62 @@ class _CreateRenterPageState extends State<CreateRenterPage> {
     mask: '###.###.###-##',
     filter: {"#": RegExp(r'[0-9]')}, // Permite apenas números
   );
-  final RenterService renterService = RenterService();
 
-  Future<void> _createRenter() async {
+  final RenterService renterService = RenterService();
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRenterData();
+  }
+
+  Future<void> _loadRenterData() async {
+    try {
+      RenterModel? renter = await renterService.getById(id: widget.renterId);
+      if (renter != null) {
+        setState(() {
+          _nameController.text = renter.name;
+          _emailController.text = renter.email;
+          _telephoneController.text = renter.telephone.toString();
+          _addressController.text = renter.address;
+          _cpfController.text = renter.cpf.toString();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar dados do locatário: $e')),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateRenter() async {
     if (_formKey.currentState!.validate()) {
+      final name = _nameController.text;
+      final email = _emailController.text;
+      final telephone = _telephoneController.text;
+      final address = _addressController.text;
+      final cpf = _cpfController.text;
+
       try {
-        await renterService.createRenter(
-          name: _nameController.text,
-          email: _emailController.text,
-          telephone: _telephoneController.text,
-          address: _addressController.text,
-          cpf: _cpfController.text,
-        );
+        await renterService.updateRenter(
+            id: widget.renterId,
+            name: name,
+            email: email,
+            telephone: telephone,
+            address: address,
+            cpf: cpf);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Editora criado com sucesso!')),
+          const SnackBar(content: Text('Usuário atualizado com sucesso!')),
         );
-        Navigator.pop(context); // Volta para a tela de usuários
+        Navigator.pop(context); // Voltar para a tela anterior
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao criar locatário: $e')),
+          SnackBar(content: Text('Erro ao atualizar usuário: $e')),
         );
       }
     }
@@ -54,7 +97,7 @@ class _CreateRenterPageState extends State<CreateRenterPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Criar Locatário',
+          'Atualizar Editora',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromRGBO(34, 1, 39, 1),
@@ -81,8 +124,8 @@ class _CreateRenterPageState extends State<CreateRenterPage> {
               ),
               TextFormField(
                 controller: _telephoneController,
-                decoration: const InputDecoration(labelText: 'Telefone'),
-                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Telephone'),
+                keyboardType: TextInputType.phone,
                 validator: (value) =>
                     value!.isEmpty ? 'Telephone não pode estar vazio' : null,
               ),
@@ -103,12 +146,12 @@ class _CreateRenterPageState extends State<CreateRenterPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: _createRenter,
+                    onPressed: _updateRenter,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Criar Renter'),
+                    child: const Text('Atualizar Locatário'),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(

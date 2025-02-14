@@ -1,44 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_teste/data/models/book_model.dart';
+import 'package:flutter_teste/data/models/publisher_model.dart';
 import 'package:flutter_teste/data/models/renter_model.dart';
-import 'package:flutter_teste/services/renter_service.dart';
+import 'package:flutter_teste/services/books_service.dart';
 import 'package:flutter_teste/views/renter_view/renter_create.dart';
 import 'package:flutter_teste/views/renter_view/renter_detail.dart';
 import 'package:flutter_teste/views/renter_view/renter_edit.dart';
 
-class RenterPage extends StatefulWidget {
-  const RenterPage({super.key});
+
+class BooksPage extends StatefulWidget {
+  const BooksPage({super.key});
 
   @override
-  State<RenterPage> createState() => _RenterPageState();
+  State<BooksPage> createState() => _BooksPageState();
 }
 
-class _RenterPageState extends State<RenterPage> {
-  late Future<List<RenterModel>> futureRenter;
-  final RenterService renterService = RenterService();
+class _BooksPageState extends State<BooksPage> {
+  late Future<List<BooksModel>> futureBooks;
+  final BooksService booksService = BooksService();
   final TextEditingController _searchController = TextEditingController();
   String searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    futureRenter = renterService.fetchRenter('', 0);
-    _fetchRenter();
+    futureBooks = booksService.fetchBooks('', 0);
+    _fetchBooks();
   }
 
-  void _fetchRenter() {
+  void _fetchBooks() {
     setState(() {
-      futureRenter = renterService.fetchRenter(searchQuery, 0);
+      futureBooks = booksService.fetchBooks(searchQuery, 0);
     });
   }
 
-  void _showDeleteConfirmationDialog(RenterModel renter) {
+  void _showDeleteConfirmationDialog(BooksModel books) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Confirmar Exclusão"),
           content: Text(
-              "Tem certeza que deseja deletar esse locatário '${renter.name}'?"),
+              "Tem certeza que deseja deletar esse locatário '${books.name}'?"),
           actions: [
             TextButton(
               onPressed: () {
@@ -49,9 +52,9 @@ class _RenterPageState extends State<RenterPage> {
             TextButton(
               onPressed: () async {
                 Navigator.pop(context); // Fecha o diálogo antes de excluir
-                await renterService.deleteRenter(
-                    id: renter.id, context: context);
-                _fetchRenter(); // Atualiza a lista após exclusão
+                await booksService.deleteBook(
+                    id: books.id, context: context);
+                _fetchBooks(); // Atualiza a lista após exclusão
               },
               child: const Text("Sim", style: TextStyle(color: Colors.red)),
             ),
@@ -61,7 +64,7 @@ class _RenterPageState extends State<RenterPage> {
     );
   }
 
-  void _showRenterOptions(RenterModel renter) {
+  void _showRenterOptions(BooksModel book) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -89,7 +92,7 @@ class _RenterPageState extends State<RenterPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => RenterDetails(id: renter.id),
+                      builder: (context) => BooksDetails(id: book.id),
                     ),
                   );
                 },
@@ -103,7 +106,7 @@ class _RenterPageState extends State<RenterPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          UpdateRenterPage(renterId: renter.id),
+                          UpdateRenterPage(renterId: book.id),
                     ),
                   );
                 },

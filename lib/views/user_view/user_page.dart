@@ -161,7 +161,7 @@ class _UsersPageState extends State<UsersPage> {
               return ListTile(
                 title: Text(user.name),
                 subtitle: Text(user.email),
-                trailing: Text(user.role),
+                trailing: Text(user.role.toString()),
                 leading: const Icon(Icons.person),
                 onTap: () => _showUserOptions(user),
               );

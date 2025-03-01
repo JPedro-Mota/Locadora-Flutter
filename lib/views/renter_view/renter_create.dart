@@ -108,7 +108,7 @@ class _CreateRenterPageState extends State<CreateRenterPage> {
                       backgroundColor: Colors.deepPurple,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Criar Renter'),
+                    child: const Text('Criar Locatário'),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(

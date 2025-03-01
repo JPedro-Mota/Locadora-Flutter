@@ -127,14 +127,19 @@ class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin {
                         icon: Icons.local_library,
                         title: "Biblioteca",
                         onTap: () {
-                          Navigator.pushNamed(context, '/');
+                          onIconPressed();
+                          context
+                              .read<NavigationBloc>()
+                              .add(NavigationEvents.BooksClickedEvent);
                         },
                       ),
                       MenuItem(
                         icon: Icons.sell,
                         title: "Alugueis",
                         onTap: () {
-                          Navigator.pushNamed(context, '/');
+                          onIconPressed();
+                          BlocProvider.of<NavigationBloc>(context)
+                              .add(NavigationEvents.RentsClickedEvent);
                         },
                       ),
                       MenuItem(

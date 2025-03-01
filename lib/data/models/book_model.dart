@@ -1,15 +1,17 @@
+import 'package:flutter_teste/data/models/publisher_model.dart';
+
 class BooksModel {
   final int id;
   final String name;
-  final String publisherId;
+  final PublisherModel publisher;
   final String author;
-  final String totalQuantity;
+  final int totalQuantity;
   final String launchDate;
 
   BooksModel({
     required this.id,
     required this.name,
-    required this.publisherId,
+    required this.publisher,
     required this.author,
     required this.totalQuantity,
     required this.launchDate,
@@ -19,10 +21,10 @@ class BooksModel {
     return BooksModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
-      publisherId: json['publisherId'] ?? '',
       author: json['author'] ?? '',
-      totalQuantity: json['totalQuantity'] ?? '',
+      totalQuantity: json['totalQuantity'],
       launchDate: json['launchDate'] ?? '',
+      publisher: PublisherModel.fromJson(json['publisher']),
     );
   }
 
@@ -30,7 +32,7 @@ class BooksModel {
     return {
       'id': id,
       'name': name,
-      'publisherId': publisherId,
+      'publisher': publisher,
       'author': author,
       'totalQuantity': totalQuantity,
       'launchDate': launchDate,

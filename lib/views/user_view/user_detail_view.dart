@@ -35,7 +35,7 @@ class _UserDetailsState extends State<UserDetails> {
           _user = user;
           _nameController.text = user.name;
           _emailController.text = user.email;
-          _roleController.text = user.role;
+          _roleController.text = user.role as String;
           _passwordController.text =
               '******'; // Não exibindo a senha por segurança
           _isLoading = false;

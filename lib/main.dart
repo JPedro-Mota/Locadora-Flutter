@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_teste/components/sidebar_layout.dart';
 import 'package:flutter_teste/src/api.dart';
 import 'package:flutter_teste/pages/DashboardPage.dart'; // Certifique-se de que este arquivo existe.
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)  {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: const LoginPage(),

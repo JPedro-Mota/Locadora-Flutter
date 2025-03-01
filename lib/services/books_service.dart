@@ -13,9 +13,9 @@ class BooksService {
   // Função para criar um usuário
   Future<void> createBook({
     required String name,
-    required String publisherId,
     required String author,
-    required String totalQuantity,
+    required int totalQuantity,
+    required int publisherId,
     required String launchDate,
   }) async {
     final url = Uri.parse('$baseURL/book');
@@ -101,7 +101,7 @@ class BooksService {
 
   Future<List<BooksModel>> fetchAllBook(String search) async {
     final apiService = ApiService();
-    final response = await apiService.fetchData('book?search=$search');
+    final response = await apiService.fetchData('/book?search=$search');
 
     final dynamic jsonData = jsonDecode(response.body);
 
@@ -148,10 +148,10 @@ class BooksService {
   Future<void> updateBooks({
     required int id,
     required String name,
-    required String publisherId,
     required String author,
-    required String totalQuantity,
     required String launchDate,
+    required int totalQuantity,
+    required int publisherId,
   }) async {
     final url = Uri.parse('$baseURL/book/$id');
     final prefs = await SharedPreferences.getInstance();

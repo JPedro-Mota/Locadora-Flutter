@@ -10,13 +10,12 @@ import 'package:http/http.dart' as http;
 class PublisherService {
   static const String baseURL =
       'https://locadora-joaopedro-back.altislabtech.com.br';
-
   // Função para criar um usuário
   Future<void> createPublisher({
     required String name,
     required String email,
     required String telephone,
-     String? site,
+    String? site,
   }) async {
     final url = Uri.parse('$baseURL/publisher');
 
@@ -39,7 +38,7 @@ class PublisherService {
       "name": name,
       "email": email,
       "telephone": telephone,
-      "site": site,
+      if (site != null) "site": site,
     });
 
     try {
@@ -60,6 +59,10 @@ class PublisherService {
 
   // Função para buscar usuários
   Future<List<PublisherModel>> fetchPublisher(String search, int page) async {
+    final apiService = ApiService();
+    final response =
+        await apiService.fetchData('/publisher?search=$search&page=$page');
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('authToken');
     print('AAAAAAAAA: $token');
@@ -69,23 +72,13 @@ class PublisherService {
       throw Exception("Token não encontrado. Faça o login novamente.");
     }
 
-    final url = Uri.parse('$baseURL/publisher?search=$search&page=$page');
-    print('$baseURL/publisher?search=$search&page=$page');
-
-    final headers = {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token", // Token adicionado no cabeçalho
-    };
-
     try {
-      final response = await http.get(url, headers: headers);
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = jsonDecode(response.body);
         final List<dynamic>? content = jsonData["content"];
 
         if (content == null) {
-          throw Exception("Nenhum usuário encontrado.");
+          throw Exception("Nenhum editora encontrada.");
         }
 
         return content.map((value) => PublisherModel.fromJson(value)).toList();
@@ -100,7 +93,7 @@ class PublisherService {
 
   Future<List<PublisherModel>> fetchAllPublisher(String search) async {
     final apiService = ApiService();
-    final response = await apiService.fetchData('publisher?search=$search');
+    final response = await apiService.fetchData('/publisher?search=$search');
 
     final dynamic jsonData = jsonDecode(response.body);
 
@@ -189,7 +182,7 @@ class PublisherService {
     }
   }
 
-   Future<bool> deletePublisher(
+  Future<bool> deletePublisher(
       {required int id, required BuildContext context}) async {
     final url = Uri.parse('$baseURL/publisher/$id');
     final prefs = await SharedPreferences.getInstance();
@@ -230,6 +223,4 @@ class PublisherService {
       return false;
     }
   }
-
 }
-

@@ -100,7 +100,7 @@ class RenterService {
 
   Future<List<RenterModel>> fetchAllRenter(String search) async {
     final apiService = ApiService();
-    final response = await apiService.fetchData('renter?search=$search');
+    final response = await apiService.fetchData('/renter?search=$search');
 
     final dynamic jsonData = jsonDecode(response.body);
 

@@ -1,62 +1,73 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_teste/data/models/book_model.dart';
-import 'package:flutter_teste/data/models/publisher_model.dart';
-import 'package:flutter_teste/data/models/renter_model.dart';
-import 'package:flutter_teste/services/books_service.dart';
-import 'package:flutter_teste/views/renter_view/renter_create.dart';
-import 'package:flutter_teste/views/renter_view/renter_detail.dart';
-import 'package:flutter_teste/views/renter_view/renter_edit.dart';
+import 'package:flutter_teste/data/models/rents_model.dart';
+import 'package:flutter_teste/enum/enum_role.dart';
+import 'package:flutter_teste/services/rents_service.dart';
+import 'package:flutter_teste/views/rents_view/rents_create.dart';
+import 'package:flutter_teste/views/rents_view/rents_edit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-
-class BooksPage extends StatefulWidget {
-  const BooksPage({super.key});
+class RentsPage extends StatefulWidget {
+  const RentsPage({super.key});
 
   @override
-  State<BooksPage> createState() => _BooksPageState();
+  State<RentsPage> createState() => _RentsPageState();
 }
 
-class _BooksPageState extends State<BooksPage> {
-  late Future<List<BooksModel>> futureBooks;
-  final BooksService booksService = BooksService();
+class _RentsPageState extends State<RentsPage> {
+  String role = '';
+  late Future<List<RentsModel>> futureRents;
+  int page = 0;
+  String search = "";
   final TextEditingController _searchController = TextEditingController();
-  String searchQuery = '';
+  Map<int, bool> expandedState = {};
 
   @override
   void initState() {
     super.initState();
-    futureBooks = booksService.fetchBooks('', 0);
-    _fetchBooks();
+    _fetchRents();
+    _fetchRole();
   }
 
-  void _fetchBooks() {
+  void _fetchRents() {
     setState(() {
-      futureBooks = booksService.fetchBooks(searchQuery, 0);
+      futureRents = RentsService().fetchRents(search, page);
     });
   }
 
-  void _showDeleteConfirmationDialog(BooksModel books) {
+  Future<void> _fetchRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      role =
+          prefs.getString('role') ?? EnumRole.USER.toString().split('.').last;
+    });
+  }
+
+  void _showDeliveryConfirmationDialog(BuildContext context, int id) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Confirmar Exclusão"),
-          content: Text(
-              "Tem certeza que deseja deletar esse locatário '${books.name}'?"),
+          title: Text("Confirmar Entrega"),
+          content: Text("Tem certeza de que deseja entregar este livro?"),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Fecha o diálogo
-              },
-              child: const Text("Cancelar"),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Cancelar"),
             ),
             TextButton(
               onPressed: () async {
-                Navigator.pop(context); // Fecha o diálogo antes de excluir
-                await booksService.deleteBook(
-                    id: books.id, context: context);
-                _fetchBooks(); // Atualiza a lista após exclusão
+                try {
+                  await RentsService().deliveryRent(id: id, context: context);
+                  Navigator.of(context).pop();
+                  _fetchRents();
+                } catch (e) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
               },
-              child: const Text("Sim", style: TextStyle(color: Colors.red)),
+              child: Text("Entregar", style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -64,7 +75,7 @@ class _BooksPageState extends State<BooksPage> {
     );
   }
 
-  void _showRenterOptions(BooksModel book) {
+  void _showRentsOptions(RentsModel rent) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -86,15 +97,11 @@ class _BooksPageState extends State<BooksPage> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.visibility, color: Colors.deepPurple),
-                title: const Text('Detalhes'),
+                leading: const Icon(Icons.check, color: Colors.green),
+                title: const Text('Devolver'),
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BooksDetails(id: book.id),
-                    ),
-                  );
+                  Navigator.pop(context);
+                  _showDeliveryConfirmationDialog(context, rent.id);
                 },
               ),
               ListTile(
@@ -105,18 +112,9 @@ class _BooksPageState extends State<BooksPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          UpdateRenterPage(renterId: book.id),
+                      builder: (context) => UpdateRentPage(rentId: rent.id),
                     ),
                   );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Excluir'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showDeleteConfirmationDialog(renter);
                 },
               ),
             ],
@@ -131,7 +129,7 @@ class _BooksPageState extends State<BooksPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Lista de Locatários',
+          'Lista de Livros',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromRGBO(34, 1, 39, 1),
@@ -146,7 +144,7 @@ class _BooksPageState extends State<BooksPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const CreateRenterPage()),
+                    builder: (context) => const CreateRentsPage()),
               );
             },
           ),
@@ -159,8 +157,8 @@ class _BooksPageState extends State<BooksPage> {
                 controller: _searchController,
                 onChanged: (value) {
                   setState(() {
-                    searchQuery = value;
-                    _fetchRenter();
+                    search = value;
+                    _fetchRents();
                   });
                 },
                 decoration: InputDecoration(
@@ -176,8 +174,8 @@ class _BooksPageState extends State<BooksPage> {
               ),
             )),
       ),
-      body: FutureBuilder<List<RenterModel>>(
-        future: futureRenter,
+      body: FutureBuilder<List<RentsModel>>(
+        future: futureRents,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -185,25 +183,45 @@ class _BooksPageState extends State<BooksPage> {
           if (snapshot.hasError) {
             return Center(child: Text('Erro: ${snapshot.error}'));
           }
-          final renters = snapshot.data ?? [];
-          if (renters.isEmpty) {
-            return const Center(child: Text('Nenhum locatário encontrado.'));
+          final rents = snapshot.data ?? [];
+          if (rents.isEmpty) {
+            return const Center(child: Text('Nenhum aluguel encontrado.'));
           }
           return ListView.builder(
-            itemCount: renters.length,
+            itemCount: rents.length,
             itemBuilder: (context, index) {
-              final renter = renters[index];
+              final rent = rents[index];
               return ListTile(
-                title: Text(renter.name),
-                subtitle: Text(renter.email),
-                trailing: Text(renter.telephone),
+                title: Text('${rent.book.name}'),
+                subtitle: Text('${rent.renter.name}'),
+                trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("${_translateStatus(rent.status)}"),
+                      Text(rent.deadLine.toString())
+                    ]),
                 leading: const Icon(Icons.person),
-                onTap: () => _showRenterOptions(renter),
+                onTap: () => _showRentsOptions(rent),
               );
             },
           );
         },
       ),
     );
+  }
+
+  String _translateStatus(String status) {
+    switch (status) {
+      case 'RENTED':
+        return 'Alugado';
+      case 'IN_TIME':
+        return 'Devolvido no prazo';
+      case 'LATE':
+        return 'Atrasado';
+      case 'DELIVERED_WITH_DELAY':
+        return 'Devolvido fora do prazo';
+      default:
+        return status;
+    }
   }
 }

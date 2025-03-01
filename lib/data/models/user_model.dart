@@ -1,9 +1,11 @@
+
+import 'package:flutter_teste/enum/enum_role.dart';
 class UsersModel {
   final int id;
   final String name;
   final String email;
   final String password;
-  final String role;
+  final EnumRole role;
 
   UsersModel({
     required this.id,
@@ -13,13 +15,13 @@ class UsersModel {
     required this.password,
   });
 
-    factory UsersModel.fromJson(Map<String, dynamic> json) {
+  factory UsersModel.fromJson(Map<String, dynamic> json) {
     return UsersModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       email: json['email'] ?? '',
-      role: json['role'] ?? '',
-      password: json['password'] ?? '******', // Se não vier, define '******'
+      password: json['password'] ?? '******',
+      role: EnumRole.fromString(json['role'] as String),// Se não vier, define '******'
     );
   }
 
@@ -28,8 +30,7 @@ class UsersModel {
       'id': id,
       'name': name,
       'email': email,
-      'role': role,
-      
+      'role': role.name, // Convertendo Enum para String
     };
   }
 }
